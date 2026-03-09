@@ -310,19 +310,18 @@ class HistoryView(ctk.CTkFrame):
         duration = format_duration(meeting.duration)
 
         card = ctk.CTkFrame(
-            self._scroll, corner_radius=6, height=36,
+            self._scroll, corner_radius=6,
             fg_color=_CARD_BG,
             border_width=1, border_color=("gray82", "gray22"),
         )
         card.grid(row=row, column=0, sticky="ew", pady=2, padx=4)
         card.grid_columnconfigure(2, weight=1)
-        card.grid_propagate(False)
 
         # Акцент-полоска слева
         accent_bar = ctk.CTkFrame(
             card, width=3, corner_radius=1, fg_color=_ACCENT,
         )
-        accent_bar.grid(row=0, column=0, sticky="ns", padx=(4, 6), pady=4)
+        accent_bar.grid(row=0, column=0, sticky="ns", padx=(4, 6), pady=6)
 
         # Дата
         date_label = ctk.CTkLabel(
@@ -330,7 +329,7 @@ class HistoryView(ctk.CTkFrame):
             text_color=_DATE_COLOR,
             font=ctk.CTkFont(size=11), width=72,
         )
-        date_label.grid(row=0, column=1, padx=(0, 6), sticky="w")
+        date_label.grid(row=0, column=1, padx=(0, 6), pady=5)
 
         # Название + папка в одну строку
         title_text = meeting.title or "Без названия"
@@ -346,14 +345,14 @@ class HistoryView(ctk.CTkFrame):
             card, text=title_text, anchor="w",
             font=ctk.CTkFont(size=12, weight="bold"),
         )
-        title_label.grid(row=0, column=2, sticky="ew")
+        title_label.grid(row=0, column=2, sticky="ew", pady=5)
 
         # Длительность
         dur_label = ctk.CTkLabel(
             card, text=duration, text_color=_DUR_COLOR,
             font=ctk.CTkFont(size=11),
         )
-        dur_label.grid(row=0, column=3, padx=(6, 10), sticky="e")
+        dur_label.grid(row=0, column=3, padx=(6, 10), pady=5)
 
         # Все виджеты для биндинга
         widgets = [card, date_label, title_label, dur_label, accent_bar]
