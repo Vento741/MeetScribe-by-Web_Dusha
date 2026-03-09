@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class AudioDevice:
     """Аудиоустройство системы."""
+
     index: int
     name: str
     channels: int
@@ -31,14 +32,22 @@ def list_audio_devices() -> list[AudioDevice]:
 
     for i, dev in enumerate(all_devs):
         if dev["max_input_channels"] > 0:
-            api_name = hostapis[dev["hostapi"]]["name"] if dev["hostapi"] < len(hostapis) else ""
-            is_loopback = "loopback" in dev["name"].lower() or "wasapi" in api_name.lower()
-            devices.append(AudioDevice(
-                index=i,
-                name=dev["name"],
-                channels=dev["max_input_channels"],
-                is_loopback=is_loopback,
-            ))
+            api_name = (
+                hostapis[dev["hostapi"]]["name"]
+                if dev["hostapi"] < len(hostapis)
+                else ""
+            )
+            is_loopback = (
+                "loopback" in dev["name"].lower() or "wasapi" in api_name.lower()
+            )
+            devices.append(
+                AudioDevice(
+                    index=i,
+                    name=dev["name"],
+                    channels=dev["max_input_channels"],
+                    is_loopback=is_loopback,
+                )
+            )
     return devices
 
 
@@ -68,27 +77,45 @@ class AudioRecorder:
         self._level_callback = callback
 
     def _record_stream(
-        self, device: int, data_list: list, samplerate: int = 44100, channels: int = 1, is_mic: bool = True,
+        self,
+        device: int,
+        data_list: list,
+        samplerate: int = 44100,
+        channels: int = 1,
+        is_mic: bool = True,
     ) -> None:
         """Записывает аудиопоток с указанного устройства."""
         try:
+
             def callback(indata, frames, time_info, status):
                 if status:
-                    logger.warning("Статус аудио (%s): %s", "микрофон" if is_mic else "система", status)
+                    logger.warning(
+                        "Статус аудио (%s): %s",
+                        "микрофон" if is_mic else "система",
+                        status,
+                    )
                 data_list.append(indata.copy())
                 if self._level_callback:
                     level = float(np.abs(indata).mean())
                     self._level_callback("mic" if is_mic else "sys", level)
 
-            with sd.InputStream(device=device, samplerate=samplerate,
-                                channels=channels, callback=callback):
+            with sd.InputStream(
+                device=device,
+                samplerate=samplerate,
+                channels=channels,
+                callback=callback,
+            ):
                 while self.is_recording:
                     sd.sleep(100)
         except Exception as e:
-            logger.error("Ошибка записи (%s): %s", "микрофон" if is_mic else "система", e)
+            logger.error(
+                "Ошибка записи (%s): %s", "микрофон" if is_mic else "система", e
+            )
 
     def start(
-        self, output_dir: Path, mic_device: int | None = None,
+        self,
+        output_dir: Path,
+        mic_device: int | None = None,
         loopback_device: int | None = None,
     ) -> None:
         """Начинает запись с указанных устройств."""

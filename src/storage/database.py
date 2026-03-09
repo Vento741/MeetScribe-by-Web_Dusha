@@ -65,8 +65,14 @@ class MeetingDB:
         return Meeting(**dict(row))
 
     def create_meeting(
-        self, title: str, date: str, duration: int,
-        audio_path: str, transcript: str, summary: str, prompt_used: str,
+        self,
+        title: str,
+        date: str,
+        duration: int,
+        audio_path: str,
+        transcript: str,
+        summary: str,
+        prompt_used: str,
     ) -> int:
         cursor = self._conn.execute(
             "INSERT INTO meetings (title, date, duration, audio_path, transcript, summary, prompt_used) "

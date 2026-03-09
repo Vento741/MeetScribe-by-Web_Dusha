@@ -10,7 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 def mix_audio(
-    mic_path: Path | None, sys_path: Path | None, output_path: Path,
+    mic_path: Path | None,
+    sys_path: Path | None,
+    output_path: Path,
 ) -> Path:
     """Микширует аудио с микрофона и системного звука в один файл."""
     streams = []

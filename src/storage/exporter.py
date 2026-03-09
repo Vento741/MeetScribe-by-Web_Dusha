@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def _sanitize_filename(name: str) -> str:
     """Очищает имя файла от недопустимых символов."""
-    return re.sub(r'[<>:"/\\|?*]', '_', name).strip()[:50]
+    return re.sub(r'[<>:"/\\|?*]', "_", name).strip()[:50]
 
 
 def _format_duration(seconds: int) -> str:

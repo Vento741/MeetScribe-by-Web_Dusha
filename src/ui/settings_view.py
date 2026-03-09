@@ -24,13 +24,15 @@ class SettingsView(ctk.CTkFrame):
         row = 0
 
         # Заголовок
-        ctk.CTkLabel(self, text="Настройки", font=ctk.CTkFont(size=24, weight="bold")).grid(
-            row=row, column=0, columnspan=2, sticky="w", pady=(0, 20)
-        )
+        ctk.CTkLabel(
+            self, text="Настройки", font=ctk.CTkFont(size=24, weight="bold")
+        ).grid(row=row, column=0, columnspan=2, sticky="w", pady=(0, 20))
         row += 1
 
         # API ключ
-        ctk.CTkLabel(self, text="API ключ OpenRouter:").grid(row=row, column=0, sticky="w", pady=5)
+        ctk.CTkLabel(self, text="API ключ OpenRouter:").grid(
+            row=row, column=0, sticky="w", pady=5
+        )
         self._api_entry = ctk.CTkEntry(self, show="*", width=400)
         self._api_entry.insert(0, cfg.api_key)
         self._api_entry.grid(row=row, column=1, sticky="ew", pady=5, padx=(10, 0))
@@ -48,8 +50,14 @@ class SettingsView(ctk.CTkFrame):
         self._theme_var = ctk.StringVar(value=cfg.theme)
         theme_frame = ctk.CTkFrame(self, fg_color="transparent")
         theme_frame.grid(row=row, column=1, sticky="w", pady=5, padx=(10, 0))
-        for val, label in [("dark", "Тёмная"), ("light", "Светлая"), ("system", "Системная")]:
-            ctk.CTkRadioButton(theme_frame, text=label, variable=self._theme_var, value=val).pack(side="left", padx=10)
+        for val, label in [
+            ("dark", "Тёмная"),
+            ("light", "Светлая"),
+            ("system", "Системная"),
+        ]:
+            ctk.CTkRadioButton(
+                theme_frame, text=label, variable=self._theme_var, value=val
+            ).pack(side="left", padx=10)
         row += 1
 
         # Аудиоустройства
@@ -57,33 +65,45 @@ class SettingsView(ctk.CTkFrame):
         device_names = [f"{d.index}: {d.name}" for d in devices]
 
         ctk.CTkLabel(self, text="Микрофон:").grid(row=row, column=0, sticky="w", pady=5)
-        mic_names = [n for n, d in zip(device_names, devices) if not d.is_loopback] or ["(не найдено)"]
+        mic_names = [n for n, d in zip(device_names, devices) if not d.is_loopback] or [
+            "(не найдено)"
+        ]
         self._mic_combo = ctk.CTkComboBox(self, values=mic_names, width=400)
         self._mic_combo.grid(row=row, column=1, sticky="ew", pady=5, padx=(10, 0))
         row += 1
 
-        ctk.CTkLabel(self, text="Системный звук:").grid(row=row, column=0, sticky="w", pady=5)
-        loop_names = [n for n, d in zip(device_names, devices) if d.is_loopback] or ["(не найдено)"]
+        ctk.CTkLabel(self, text="Системный звук:").grid(
+            row=row, column=0, sticky="w", pady=5
+        )
+        loop_names = [n for n, d in zip(device_names, devices) if d.is_loopback] or [
+            "(не найдено)"
+        ]
         self._loop_combo = ctk.CTkComboBox(self, values=loop_names, width=400)
         self._loop_combo.grid(row=row, column=1, sticky="ew", pady=5, padx=(10, 0))
         row += 1
 
         # Горячие клавиши
-        ctk.CTkLabel(self, text="Старт/стоп записи:").grid(row=row, column=0, sticky="w", pady=5)
+        ctk.CTkLabel(self, text="Старт/стоп записи:").grid(
+            row=row, column=0, sticky="w", pady=5
+        )
         self._hotkey_entry = ctk.CTkEntry(self, width=200)
         self._hotkey_entry.insert(0, cfg.hotkey_toggle)
         self._hotkey_entry.grid(row=row, column=1, sticky="w", pady=5, padx=(10, 0))
         row += 1
 
         # Папка сохранения
-        ctk.CTkLabel(self, text="Папка сохранения:").grid(row=row, column=0, sticky="w", pady=5)
+        ctk.CTkLabel(self, text="Папка сохранения:").grid(
+            row=row, column=0, sticky="w", pady=5
+        )
         self._dir_entry = ctk.CTkEntry(self, width=400)
         self._dir_entry.insert(0, cfg.save_dir)
         self._dir_entry.grid(row=row, column=1, sticky="ew", pady=5, padx=(10, 0))
         row += 1
 
         # Шаблон промпта
-        ctk.CTkLabel(self, text="Шаблон промпта:").grid(row=row, column=0, sticky="nw", pady=5)
+        ctk.CTkLabel(self, text="Шаблон промпта:").grid(
+            row=row, column=0, sticky="nw", pady=5
+        )
         self._prompt_text = ctk.CTkTextbox(self, height=150, width=400)
         self._prompt_text.insert("1.0", cfg.prompt_template)
         self._prompt_text.grid(row=row, column=1, sticky="ew", pady=5, padx=(10, 0))
@@ -107,8 +127,12 @@ class SettingsView(ctk.CTkFrame):
         # Парсинг индексов устройств
         mic_sel = self._mic_combo.get()
         loop_sel = self._loop_combo.get()
-        cfg.mic_device = int(mic_sel.split(":")[0]) if mic_sel and mic_sel[0].isdigit() else None
-        cfg.loopback_device = int(loop_sel.split(":")[0]) if loop_sel and loop_sel[0].isdigit() else None
+        cfg.mic_device = (
+            int(mic_sel.split(":")[0]) if mic_sel and mic_sel[0].isdigit() else None
+        )
+        cfg.loopback_device = (
+            int(loop_sel.split(":")[0]) if loop_sel and loop_sel[0].isdigit() else None
+        )
 
         ctk.set_appearance_mode(cfg.theme)
         save_config(cfg)

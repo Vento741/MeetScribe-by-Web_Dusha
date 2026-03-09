@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import customtkinter as ctk
 
-from audio.recorder import AudioRecorder, list_audio_devices
+from audio.recorder import AudioRecorder
 
 if TYPE_CHECKING:
     from app import MeetScribeApp
@@ -23,37 +23,52 @@ class RecordingView(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
 
         # Заголовок
-        title = ctk.CTkLabel(self, text="Запись встречи", font=ctk.CTkFont(size=24, weight="bold"))
+        title = ctk.CTkLabel(
+            self, text="Запись встречи", font=ctk.CTkFont(size=24, weight="bold")
+        )
         title.grid(row=0, column=0, pady=(0, 20))
 
         # Таймер
-        self._timer_label = ctk.CTkLabel(self, text="00:00:00", font=ctk.CTkFont(size=48, family="Consolas"))
+        self._timer_label = ctk.CTkLabel(
+            self, text="00:00:00", font=ctk.CTkFont(size=48, family="Consolas")
+        )
         self._timer_label.grid(row=1, column=0, pady=10)
 
         # Индикаторы уровня звука
         meters_frame = ctk.CTkFrame(self, fg_color="transparent")
         meters_frame.grid(row=2, column=0, pady=20)
 
-        ctk.CTkLabel(meters_frame, text="Микрофон:").grid(row=0, column=0, padx=(0, 10), sticky="w")
+        ctk.CTkLabel(meters_frame, text="Микрофон:").grid(
+            row=0, column=0, padx=(0, 10), sticky="w"
+        )
         self._mic_bar = ctk.CTkProgressBar(meters_frame, width=300)
         self._mic_bar.grid(row=0, column=1)
         self._mic_bar.set(0)
 
-        ctk.CTkLabel(meters_frame, text="Система:").grid(row=1, column=0, padx=(0, 10), sticky="w", pady=5)
+        ctk.CTkLabel(meters_frame, text="Система:").grid(
+            row=1, column=0, padx=(0, 10), sticky="w", pady=5
+        )
         self._sys_bar = ctk.CTkProgressBar(meters_frame, width=300)
         self._sys_bar.grid(row=1, column=1, pady=5)
         self._sys_bar.set(0)
 
         # Кнопка записи
         self._rec_button = ctk.CTkButton(
-            self, text="Начать запись", width=250, height=50,
-            font=ctk.CTkFont(size=18), fg_color="#c0392b", hover_color="#e74c3c",
+            self,
+            text="Начать запись",
+            width=250,
+            height=50,
+            font=ctk.CTkFont(size=18),
+            fg_color="#c0392b",
+            hover_color="#e74c3c",
             command=self._toggle_recording,
         )
         self._rec_button.grid(row=3, column=0, pady=30)
 
         # Статус
-        self._status_label = ctk.CTkLabel(self, text="Выберите устройства в настройках и нажмите \"Начать запись\"")
+        self._status_label = ctk.CTkLabel(
+            self, text='Выберите устройства в настройках и нажмите "Начать запись"'
+        )
         self._status_label.grid(row=4, column=0)
 
     def _toggle_recording(self) -> None:
@@ -74,6 +89,7 @@ class RecordingView(ctk.CTkFrame):
 
         import tempfile
         from pathlib import Path
+
         temp_dir = Path(tempfile.gettempdir()) / "MeetScribe"
         self._recorder.start(
             output_dir=temp_dir,
@@ -81,7 +97,9 @@ class RecordingView(ctk.CTkFrame):
             loopback_device=cfg.loopback_device,
         )
 
-        self._rec_button.configure(text="Остановить и обработать", fg_color="#27ae60", hover_color="#2ecc71")
+        self._rec_button.configure(
+            text="Остановить и обработать", fg_color="#27ae60", hover_color="#2ecc71"
+        )
         self._status_label.configure(text="Запись идёт...")
         self._app.set_status("Запись идёт...")
         self._update_timer()
@@ -131,11 +149,15 @@ class RecordingView(ctk.CTkFrame):
                 transcript = loop.run_until_complete(
                     transcribe_audio(audio_path, cfg.api_key, cfg.model)
                 )
-                self.after(0, lambda: self._status_label.configure(text="Генерация саммари..."))
+                self.after(
+                    0, lambda: self._status_label.configure(text="Генерация саммари...")
+                )
                 self.after(0, lambda: self._app.set_status("Генерация саммари..."))
 
                 summary = loop.run_until_complete(
-                    generate_summary(transcript, cfg.prompt_template, cfg.api_key, cfg.model)
+                    generate_summary(
+                        transcript, cfg.prompt_template, cfg.api_key, cfg.model
+                    )
                 )
 
                 duration = int(self._recorder.elapsed_seconds) or 0
@@ -150,8 +172,11 @@ class RecordingView(ctk.CTkFrame):
                 )
 
                 self.after(0, lambda: self._on_pipeline_done(meeting_id))
-            except Exception as e:
-                self.after(0, lambda: self._on_pipeline_error(str(e)))
+            except Exception:
+                import traceback
+
+                err_msg = traceback.format_exc()
+                self.after(0, lambda: self._on_pipeline_error(err_msg))
             finally:
                 loop.close()
 
@@ -160,7 +185,10 @@ class RecordingView(ctk.CTkFrame):
     def _on_pipeline_done(self, meeting_id: int) -> None:
         """Обработка успешного завершения пайплайна."""
         self._rec_button.configure(
-            state="normal", text="Начать запись", fg_color="#c0392b", hover_color="#e74c3c"
+            state="normal",
+            text="Начать запись",
+            fg_color="#c0392b",
+            hover_color="#e74c3c",
         )
         self._status_label.configure(text=f"Готово! Встреча #{meeting_id} сохранена.")
         self._app.set_status("Готово")
@@ -173,7 +201,10 @@ class RecordingView(ctk.CTkFrame):
     def _on_pipeline_error(self, error: str) -> None:
         """Обработка ошибки пайплайна."""
         self._rec_button.configure(
-            state="normal", text="Начать запись", fg_color="#c0392b", hover_color="#e74c3c"
+            state="normal",
+            text="Начать запись",
+            fg_color="#c0392b",
+            hover_color="#e74c3c",
         )
         self._status_label.configure(text=f"Ошибка: {error}")
         self._app.set_status(f"Ошибка: {error}")

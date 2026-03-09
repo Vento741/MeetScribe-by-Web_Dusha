@@ -14,7 +14,9 @@ class Sidebar(ctk.CTkFrame):
         self._buttons: dict[str, ctk.CTkButton] = {}
 
         # Логотип
-        logo = ctk.CTkLabel(self, text="MeetScribe", font=ctk.CTkFont(size=20, weight="bold"))
+        logo = ctk.CTkLabel(
+            self, text="MeetScribe", font=ctk.CTkFont(size=20, weight="bold")
+        )
         logo.pack(padx=20, pady=(20, 30))
 
         # Кнопки навигации

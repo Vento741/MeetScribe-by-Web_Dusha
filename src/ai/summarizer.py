@@ -36,7 +36,9 @@ async def generate_summary(
                 result = resp.json()
                 return result["choices"][0]["message"]["content"]
             except (httpx.HTTPStatusError, httpx.RequestError, KeyError) as e:
-                logger.warning("Попытка генерации саммари %d не удалась: %s", attempt + 1, e)
+                logger.warning(
+                    "Попытка генерации саммари %d не удалась: %s", attempt + 1, e
+                )
                 if attempt == 2:
                     raise
 

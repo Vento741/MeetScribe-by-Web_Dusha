@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Callable
 
 import httpx
-import numpy as np
 import soundfile as sf
 
 logger = logging.getLogger(__name__)
@@ -24,7 +23,9 @@ TRANSCRIPTION_PROMPT = """Транскрибируй это аудио на ру
 
 
 def chunk_audio(
-    wav_path: Path, chunk_minutes: int = 10, overlap_seconds: int = 30,
+    wav_path: Path,
+    chunk_minutes: int = 10,
+    overlap_seconds: int = 30,
 ) -> list[Path]:
     """Разбивает аудиофайл на чанки заданной длительности с перекрытием."""
     data, sr = sf.read(str(wav_path), dtype="float32")
@@ -72,19 +73,21 @@ async def transcribe_audio(
 
             payload = {
                 "model": model,
-                "messages": [{
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": TRANSCRIPTION_PROMPT},
-                        {
-                            "type": "input_audio",
-                            "input_audio": {
-                                "data": audio_b64,
-                                "format": "wav",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": TRANSCRIPTION_PROMPT},
+                            {
+                                "type": "input_audio",
+                                "input_audio": {
+                                    "data": audio_b64,
+                                    "format": "wav",
+                                },
                             },
-                        },
-                    ],
-                }],
+                        ],
+                    }
+                ],
             }
 
             for attempt in range(3):
@@ -105,7 +108,9 @@ async def transcribe_audio(
                         progress_callback((i + 1) / len(chunks))
                     break
                 except (httpx.HTTPStatusError, httpx.RequestError, KeyError) as e:
-                    logger.warning("Попытка транскрибации %d не удалась: %s", attempt + 1, e)
+                    logger.warning(
+                        "Попытка транскрибации %d не удалась: %s", attempt + 1, e
+                    )
                     if attempt == 2:
                         raise
 

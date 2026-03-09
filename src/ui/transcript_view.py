@@ -14,7 +14,9 @@ if TYPE_CHECKING:
 class TranscriptView(ctk.CTkFrame):
     """Просмотр транскрипта и саммари встречи с вкладками."""
 
-    def __init__(self, parent: ctk.CTkFrame, app: MeetScribeApp, meeting: Meeting) -> None:
+    def __init__(
+        self, parent: ctk.CTkFrame, app: MeetScribeApp, meeting: Meeting
+    ) -> None:
         super().__init__(parent, fg_color="transparent")
         self._app = app
         self._meeting = meeting
@@ -27,14 +29,18 @@ class TranscriptView(ctk.CTkFrame):
         title_frame.grid(row=0, column=0, sticky="ew", pady=(0, 5))
         title_frame.grid_columnconfigure(0, weight=1)
 
-        self._title_entry = ctk.CTkEntry(title_frame, font=ctk.CTkFont(size=20, weight="bold"))
+        self._title_entry = ctk.CTkEntry(
+            title_frame, font=ctk.CTkFont(size=20, weight="bold")
+        )
         self._title_entry.insert(0, meeting.title or "")
         self._title_entry.grid(row=0, column=0, sticky="ew")
         self._title_entry.bind("<Return>", self._save_title)
 
         # Информационная строка
         duration = f"{meeting.duration // 3600:02d}:{(meeting.duration % 3600) // 60:02d}:{meeting.duration % 60:02d}"
-        info = ctk.CTkLabel(self, text=f"{meeting.date[:10]}  |  {duration}", text_color="gray")
+        info = ctk.CTkLabel(
+            self, text=f"{meeting.date[:10]}  |  {duration}", text_color="gray"
+        )
         info.grid(row=1, column=0, sticky="w", pady=(0, 10))
 
         # Вкладки
@@ -58,9 +64,18 @@ class TranscriptView(ctk.CTkFrame):
         btn_frame = ctk.CTkFrame(self, fg_color="transparent")
         btn_frame.grid(row=3, column=0, sticky="ew", pady=10)
 
-        ctk.CTkButton(btn_frame, text="Копировать саммари", command=self._copy_summary).pack(side="left", padx=5)
-        ctk.CTkButton(btn_frame, text="Экспорт .md", command=self._export_md).pack(side="left", padx=5)
-        ctk.CTkButton(btn_frame, text="Назад", fg_color="gray", command=lambda: self._app.show_view("history")).pack(side="right", padx=5)
+        ctk.CTkButton(
+            btn_frame, text="Копировать саммари", command=self._copy_summary
+        ).pack(side="left", padx=5)
+        ctk.CTkButton(btn_frame, text="Экспорт .md", command=self._export_md).pack(
+            side="left", padx=5
+        )
+        ctk.CTkButton(
+            btn_frame,
+            text="Назад",
+            fg_color="gray",
+            command=lambda: self._app.show_view("history"),
+        ).pack(side="right", padx=5)
 
     def _save_title(self, event=None) -> None:
         """Сохраняет новое название встречи."""
@@ -79,6 +94,7 @@ class TranscriptView(ctk.CTkFrame):
     def _export_md(self) -> None:
         """Экспортирует встречу в Markdown-файл."""
         from pathlib import Path
+
         save_dir = Path(self._app.config.save_dir)
         path = export_to_markdown(self._meeting, save_dir)
         self._app.set_status(f"Экспортировано: {path}")

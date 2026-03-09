@@ -33,8 +33,10 @@ DEFAULT_PROMPT = """На основе транскрипта встречи со
 (кто какую позицию занял по ключевым вопросам)
 """
 
+
 def _default_save_dir() -> str:
     return str(Path.home() / "Documents" / "MeetScribe")
+
 
 def _default_appdata_dir() -> Path:
     return Path(os.environ.get("APPDATA", Path.home())) / "MeetScribe"

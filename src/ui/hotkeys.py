@@ -27,7 +27,9 @@ class GlobalHotkeys:
             self._listener = keyboard.GlobalHotKeys(self._bindings)
             self._listener.daemon = True
             self._listener.start()
-            logger.info("Горячие клавиши зарегистрированы: %s", list(self._bindings.keys()))
+            logger.info(
+                "Горячие клавиши зарегистрированы: %s", list(self._bindings.keys())
+            )
         except Exception as e:
             logger.error("Не удалось зарегистрировать горячие клавиши: %s", e)
 

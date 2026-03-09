@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import customtkinter as ctk
 
-from config import AppConfig, load_config, save_config
+from config import load_config
 from storage.database import MeetingDB
 from ui.sidebar import Sidebar
 
@@ -44,6 +44,7 @@ class MeetScribeApp(ctk.CTk):
 
         # Горячие клавиши
         from ui.hotkeys import GlobalHotkeys
+
         self._hotkeys = GlobalHotkeys()
         self._hotkeys.register(self.config.hotkey_toggle, self._hotkey_toggle_recording)
         self._hotkeys.start()
@@ -73,12 +74,15 @@ class MeetScribeApp(ctk.CTk):
         """Создаёт вид по имени (ленивая инициализация)."""
         if name == "recording":
             from ui.recording_view import RecordingView
+
             return RecordingView(self._main_container, app=self)
         elif name == "history":
             from ui.history_view import HistoryView
+
             return HistoryView(self._main_container, app=self)
         elif name == "settings":
             from ui.settings_view import SettingsView
+
             return SettingsView(self._main_container, app=self)
         else:
             placeholder = ctk.CTkFrame(self._main_container)
