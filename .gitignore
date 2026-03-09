@@ -1,0 +1,18 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+dist/
+build/
+*.spec
+*.exe
+.mypy_cache/
+.ruff_cache/
+*.wav
+*.db
+config.json
+.claude/
+
+# Internal docs — not for public repo
+CLAUDE.md
+docs/
