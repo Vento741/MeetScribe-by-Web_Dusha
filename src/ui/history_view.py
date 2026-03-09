@@ -46,7 +46,10 @@ class HistoryView(ctk.CTkFrame):
         self._folder_scroll.grid_columnconfigure(0, weight=1)
 
         ctk.CTkButton(
-            self._folder_panel, text="+ Папка", width=80, height=28,
+            self._folder_panel,
+            text="+ Папка",
+            width=80,
+            height=28,
             command=self._create_folder,
         ).grid(row=2, column=0, pady=5)
 
@@ -67,7 +70,10 @@ class HistoryView(ctk.CTkFrame):
         self._search_entry.bind("<Return>", lambda e: self._refresh())
 
         ctk.CTkButton(
-            search_frame, text="Найти", width=80, command=self._refresh,
+            search_frame,
+            text="Найти",
+            width=80,
+            command=self._refresh,
         ).grid(row=0, column=1)
 
         self._scroll = ctk.CTkScrollableFrame(right_panel)
@@ -86,7 +92,9 @@ class HistoryView(ctk.CTkFrame):
 
         # "Все встречи"
         all_btn = ctk.CTkButton(
-            self._folder_scroll, text="Все встречи", anchor="w",
+            self._folder_scroll,
+            text="Все встречи",
+            anchor="w",
             fg_color="transparent" if self._selected_folder_id is not None else None,
             text_color=("gray10", "gray90"),
             hover_color=("gray85", "gray25"),
@@ -101,7 +109,11 @@ class HistoryView(ctk.CTkFrame):
         self._render_folder_tree(folders, parent_id=None, depth=0, start_row=1)
 
     def _render_folder_tree(
-        self, folders: list[dict], parent_id: int | None, depth: int, start_row: int,
+        self,
+        folders: list[dict],
+        parent_id: int | None,
+        depth: int,
+        start_row: int,
     ) -> int:
         """Рекурсивно рендерит вложенные папки."""
         row = start_row
@@ -125,7 +137,9 @@ class HistoryView(ctk.CTkFrame):
             btn.bind("<Enter>", lambda e, f=fid: self._on_folder_drag_enter(e, f))
             btn.bind("<Leave>", lambda e: self._on_folder_drag_leave(e))
             row += 1
-            row = self._render_folder_tree(folders, parent_id=fid, depth=depth + 1, start_row=row)
+            row = self._render_folder_tree(
+                folders, parent_id=fid, depth=depth + 1, start_row=row
+            )
         return row
 
     def _select_folder(self, folder_id: int | None) -> None:
@@ -137,7 +151,8 @@ class HistoryView(ctk.CTkFrame):
     def _create_folder(self, parent_id: int | None = None) -> None:
         """Создаёт новую папку через диалог."""
         dialog = ctk.CTkInputDialog(
-            text="Имя папки:", title="Новая папка",
+            text="Имя папки:",
+            title="Новая папка",
         )
         name = dialog.get_input()
         if name and name.strip():
@@ -165,7 +180,8 @@ class HistoryView(ctk.CTkFrame):
     def _rename_folder(self, folder_id: int) -> None:
         """Переименовывает папку."""
         dialog = ctk.CTkInputDialog(
-            text="Новое имя:", title="Переименовать папку",
+            text="Новое имя:",
+            title="Переименовать папку",
         )
         name = dialog.get_input()
         if name and name.strip():
@@ -181,13 +197,17 @@ class HistoryView(ctk.CTkFrame):
         dialog.resizable(False, False)
 
         ctk.CTkLabel(
-            dialog, text="Удалить папку?\nВстречи будут перемещены в корень.",
+            dialog,
+            text="Удалить папку?\nВстречи будут перемещены в корень.",
         ).pack(pady=15)
 
         btn_frame = ctk.CTkFrame(dialog, fg_color="transparent")
         btn_frame.pack()
         ctk.CTkButton(
-            btn_frame, text="Удалить", fg_color="#c0392b", width=100,
+            btn_frame,
+            text="Удалить",
+            fg_color="#c0392b",
+            width=100,
             command=lambda: [
                 self._app.db.delete_folder(folder_id),
                 dialog.destroy(),
@@ -195,7 +215,10 @@ class HistoryView(ctk.CTkFrame):
             ],
         ).pack(side="left", padx=10)
         ctk.CTkButton(
-            btn_frame, text="Отмена", fg_color="gray", width=100,
+            btn_frame,
+            text="Отмена",
+            fg_color="gray",
+            width=100,
             command=dialog.destroy,
         ).pack(side="left", padx=10)
 
@@ -211,12 +234,15 @@ class HistoryView(ctk.CTkFrame):
             meetings = self._app.db.search(query, lightweight=True)
         else:
             meetings = self._app.db.list_meetings(
-                lightweight=True, folder_id=self._selected_folder_id,
+                lightweight=True,
+                folder_id=self._selected_folder_id,
             )
 
         if not meetings:
             ctk.CTkLabel(self._scroll, text="Нет встреч", text_color="gray").grid(
-                row=0, column=0, pady=40,
+                row=0,
+                column=0,
+                pady=40,
             )
             return
 
@@ -234,7 +260,9 @@ class HistoryView(ctk.CTkFrame):
         date_label.grid(row=0, column=0, padx=10, pady=8)
 
         title_label = ctk.CTkLabel(
-            card, text=meeting.title or "Без названия", anchor="w",
+            card,
+            text=meeting.title or "Без названия",
+            anchor="w",
             font=ctk.CTkFont(weight="bold"),
         )
         title_label.grid(row=0, column=1, sticky="w")
@@ -249,11 +277,17 @@ class HistoryView(ctk.CTkFrame):
 
         # Правый клик — контекстное меню
         for widget in (card, date_label, title_label, dur_label):
-            widget.bind("<Button-3>", lambda e, mt=meeting: self._meeting_context_menu(e, mt))
+            widget.bind(
+                "<Button-3>", lambda e, mt=meeting: self._meeting_context_menu(e, mt)
+            )
 
         # Drag & drop
         for widget in (card, date_label, title_label, dur_label):
-            widget.bind("<ButtonPress-1>", lambda e, mt=meeting: self._drag_start(e, mt), add="+")
+            widget.bind(
+                "<ButtonPress-1>",
+                lambda e, mt=meeting: self._drag_start(e, mt),
+                add="+",
+            )
             widget.bind("<B1-Motion>", self._drag_motion)
             widget.bind("<ButtonRelease-1>", self._drag_end)
 
@@ -300,13 +334,17 @@ class HistoryView(ctk.CTkFrame):
 
         title = meeting.title or "Без названия"
         ctk.CTkLabel(
-            dialog, text=f"Удалить '{title}'?\nАудиофайл тоже будет удалён.",
+            dialog,
+            text=f"Удалить '{title}'?\nАудиофайл тоже будет удалён.",
         ).pack(pady=20)
 
         btn_frame = ctk.CTkFrame(dialog, fg_color="transparent")
         btn_frame.pack()
         ctk.CTkButton(
-            btn_frame, text="Удалить", fg_color="#c0392b", width=100,
+            btn_frame,
+            text="Удалить",
+            fg_color="#c0392b",
+            width=100,
             command=lambda: [
                 self._app.db.delete_meeting(meeting.id),
                 dialog.destroy(),
@@ -315,7 +353,10 @@ class HistoryView(ctk.CTkFrame):
             ],
         ).pack(side="left", padx=10)
         ctk.CTkButton(
-            btn_frame, text="Отмена", fg_color="gray", width=100,
+            btn_frame,
+            text="Отмена",
+            fg_color="gray",
+            width=100,
             command=dialog.destroy,
         ).pack(side="left", padx=10)
 

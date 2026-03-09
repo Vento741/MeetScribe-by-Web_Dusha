@@ -137,7 +137,8 @@ class TranscriptView(ctk.CTkFrame):
         dialog.grab_set()
 
         ctk.CTkLabel(
-            dialog, text="Отредактируйте промпт:",
+            dialog,
+            text="Отредактируйте промпт:",
         ).pack(pady=(10, 5), padx=10, anchor="w")
 
         prompt_box = ctk.CTkTextbox(dialog, height=250)
@@ -169,7 +170,10 @@ class TranscriptView(ctk.CTkFrame):
             try:
                 summary = loop.run_until_complete(
                     generate_summary(
-                        self._meeting.transcript, prompt, cfg.api_key, cfg.model,
+                        self._meeting.transcript,
+                        prompt,
+                        cfg.api_key,
+                        cfg.model,
                     )
                 )
                 self.after(0, lambda: self._on_regen_done(summary, prompt))

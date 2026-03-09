@@ -129,7 +129,10 @@ class AudioRecorder:
             self._mic_samplerate = samplerate
             logger.info(
                 "Микрофон: device=%d, sr=%d, ch=%d, name=%s",
-                device, samplerate, channels, dev_info["name"],
+                device,
+                samplerate,
+                channels,
+                dev_info["name"],
             )
 
             def callback(indata, frames, time_info, status):
