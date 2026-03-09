@@ -42,6 +42,13 @@ class MeetScribeApp(ctk.CTk):
         self._statusbar = ctk.CTkLabel(self, text="Готово", anchor="w", height=25)
         self._statusbar.grid(row=1, column=0, columnspan=2, sticky="ew", padx=10)
 
+        # Горячие клавиши
+        from ui.hotkeys import GlobalHotkeys
+        self._hotkeys = GlobalHotkeys()
+        self._hotkeys.register(self.config.hotkey_toggle, self._hotkey_toggle_recording)
+        self._hotkeys.start()
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
+
         # Начальный вид
         self.show_view("recording")
 
@@ -82,7 +89,13 @@ class MeetScribeApp(ctk.CTk):
         """Обновляет текст строки статуса."""
         self._statusbar.configure(text=text)
 
-    def destroy(self) -> None:
-        """Закрывает БД и уничтожает окно."""
+    def _hotkey_toggle_recording(self) -> None:
+        """Обработчик горячей клавиши старт/стоп записи."""
+        if "recording" in self._views:
+            self.after(0, self._views["recording"]._toggle_recording)
+
+    def _on_close(self) -> None:
+        """Корректное завершение приложения."""
+        self._hotkeys.stop()
         self.db.close()
-        super().destroy()
+        self.destroy()
