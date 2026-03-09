@@ -65,6 +65,8 @@ async def _transcribe_chunk(
 ) -> str:
     """Транскрибирует один чанк аудио."""
     async with semaphore:
+        file_size_mb = chunk_path.stat().st_size / (1024 * 1024)
+        logger.info("Транскрибация чанка: %s (%.1f MB)", chunk_path.name, file_size_mb)
         audio_b64 = _audio_to_base64(chunk_path)
         messages = [
             {

@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import logging
 import threading
 import time
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import customtkinter as ctk
 
 from audio.recorder import AudioRecorder
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from app import MeetScribeApp
@@ -107,18 +111,37 @@ class RecordingView(ctk.CTkFrame):
         self._status_label.configure(text="Остановка записи...")
 
         def process():
+            import shutil
+
             from audio.mixer import mix_audio
 
             mic_path, sys_path = self._recorder.stop()
-            mixed_path = (
+
+            # Показываем ошибки записи
+            if self._recorder.mic_error:
+                logger.warning("Ошибка микрофона: %s", self._recorder.mic_error)
+            if self._recorder.sys_error:
+                logger.warning("Ошибка системного звука: %s", self._recorder.sys_error)
+
+            temp_mixed = (
                 self._app.config.temp_dir
                 / f"mixed_{time.strftime('%Y%m%d_%H%M%S')}.wav"
             )
             try:
-                mix_audio(mic_path, sys_path, mixed_path)
+                mix_audio(mic_path, sys_path, temp_mixed)
             except Exception:
-                mixed_path = mic_path or sys_path
-            self.after(0, lambda: self._process_audio(mixed_path))
+                temp_mixed = mic_path or sys_path
+
+            # Копируем аудио в папку сохранения
+            save_dir = Path(self._app.config.save_dir)
+            save_dir.mkdir(parents=True, exist_ok=True)
+            final_path = save_dir / temp_mixed.name
+            try:
+                shutil.copy2(str(temp_mixed), str(final_path))
+            except Exception:
+                final_path = temp_mixed
+
+            self.after(0, lambda: self._process_audio(final_path))
 
         threading.Thread(target=process, daemon=True).start()
 
@@ -152,17 +175,17 @@ class RecordingView(ctk.CTkFrame):
                 )
 
                 duration = int(self._recorder.elapsed_seconds) or 0
-                meeting_id = self._app.db.create_meeting(
-                    title=f"Встреча {time.strftime('%d.%m.%Y %H:%M')}",
-                    date=time.strftime("%Y-%m-%dT%H:%M:%S"),
-                    duration=duration,
-                    audio_path=str(audio_path) if audio_path else "",
-                    transcript=transcript,
-                    summary=summary,
-                    prompt_used=cfg.prompt_template,
-                )
+                result = {
+                    "title": f"Встреча {time.strftime('%d.%m.%Y %H:%M')}",
+                    "date": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                    "duration": duration,
+                    "audio_path": str(audio_path) if audio_path else "",
+                    "transcript": transcript,
+                    "summary": summary,
+                    "prompt_used": cfg.prompt_template,
+                }
 
-                self.after(0, lambda: self._on_pipeline_done(meeting_id))
+                self.after(0, lambda: self._save_and_finish(result))
             except Exception:
                 import traceback
 
@@ -172,6 +195,16 @@ class RecordingView(ctk.CTkFrame):
                 loop.close()
 
         threading.Thread(target=run_pipeline, daemon=True).start()
+
+    def _save_and_finish(self, result: dict) -> None:
+        """Сохраняет встречу в БД на главном потоке и завершает пайплайн."""
+        try:
+            meeting_id = self._app.db.create_meeting(**result)
+            self._on_pipeline_done(meeting_id)
+        except Exception:
+            import traceback
+
+            self._on_pipeline_error(traceback.format_exc())
 
     def _on_pipeline_done(self, meeting_id: int) -> None:
         """Обработка успешного завершения пайплайна."""

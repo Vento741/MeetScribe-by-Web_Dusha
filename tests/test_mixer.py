@@ -12,11 +12,13 @@ def test_mix_two_wav_files(tmp_path):
     sf.write(str(mic_path), mic, sr)
     sf.write(str(sys_path), sys, sr)
 
+    target_sr = 16000
     out = mix_audio(mic_path, sys_path, tmp_path / "mixed.wav")
     assert out.exists()
     data, rate = sf.read(str(out))
-    assert rate == sr
-    assert len(data) == sr * duration
+    assert rate == target_sr
+    expected_len = int(duration * target_sr)
+    assert abs(len(data) - expected_len) <= 1
 
 def test_mix_single_file(tmp_path):
     sr = 44100

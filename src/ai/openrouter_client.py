@@ -31,7 +31,13 @@ async def send_chat_request(
                 )
                 resp.raise_for_status()
                 result = resp.json()
-                return result["choices"][0]["message"]["content"]
+                content = result["choices"][0]["message"]["content"]
+                logger.info(
+                    "API ответ: model=%s, длина=%d символов",
+                    result.get("model", "?"),
+                    len(content) if content else 0,
+                )
+                return content or ""
             except (httpx.HTTPStatusError, httpx.RequestError, KeyError) as e:
                 logger.warning("Попытка %d не удалась: %s", attempt + 1, e)
                 if attempt == MAX_RETRIES - 1:

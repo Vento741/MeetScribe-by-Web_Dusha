@@ -62,23 +62,41 @@ class SettingsView(ctk.CTkFrame):
 
         # Аудиоустройства
         devices = list_audio_devices()
-        device_names = [f"{d.index}: {d.name}" for d in devices]
+
+        mics = [d for d in devices if not d.is_loopback]
+        loops = [d for d in devices if d.is_loopback]
+
+        mic_names = [f"{d.index}: {d.name}" for d in mics] or ["(не найдено)"]
+        loop_names = [f"{d.index}: {d.name}" for d in loops] or ["(не найдено)"]
+
+        # Определяем текущий выбор или дефолтное устройство
+        def _find_selection(devs: list, cfg_value: int | None) -> str | None:
+            names = [f"{d.index}: {d.name}" for d in devs]
+            if cfg_value is not None:
+                for name in names:
+                    if name.startswith(f"{cfg_value}:"):
+                        return name
+            # Иначе — системный дефолт
+            for d, name in zip(devs, names):
+                if d.is_default:
+                    return name
+            return names[0] if names else None
 
         ctk.CTkLabel(self, text="Микрофон:").grid(row=row, column=0, sticky="w", pady=5)
-        mic_names = [n for n, d in zip(device_names, devices) if not d.is_loopback] or [
-            "(не найдено)"
-        ]
         self._mic_combo = ctk.CTkComboBox(self, values=mic_names, width=400)
+        mic_sel = _find_selection(mics, cfg.mic_device)
+        if mic_sel:
+            self._mic_combo.set(mic_sel)
         self._mic_combo.grid(row=row, column=1, sticky="ew", pady=5, padx=(10, 0))
         row += 1
 
         ctk.CTkLabel(self, text="Системный звук:").grid(
             row=row, column=0, sticky="w", pady=5
         )
-        loop_names = [n for n, d in zip(device_names, devices) if d.is_loopback] or [
-            "(не найдено)"
-        ]
         self._loop_combo = ctk.CTkComboBox(self, values=loop_names, width=400)
+        loop_sel = _find_selection(loops, cfg.loopback_device)
+        if loop_sel:
+            self._loop_combo.set(loop_sel)
         self._loop_combo.grid(row=row, column=1, sticky="ew", pady=5, padx=(10, 0))
         row += 1
 

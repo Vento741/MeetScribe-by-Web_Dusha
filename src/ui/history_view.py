@@ -87,4 +87,8 @@ class HistoryView(ctk.CTkFrame):
 
     def _open_meeting(self, meeting) -> None:
         """Открывает встречу в виде транскрипта/саммари."""
-        self._app.show_meeting(meeting)
+        full = self._app.db.get_meeting(meeting.id)
+        if full:
+            self._app.show_meeting(full)
+        else:
+            self._app.set_status("Не удалось загрузить встречу")

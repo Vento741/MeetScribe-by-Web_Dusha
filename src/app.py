@@ -95,7 +95,7 @@ class MeetScribeApp(ctk.CTk):
 
         # Уничтожаем предыдущий TranscriptView, если есть
         if "transcript" in self._views:
-            self._views["transcript"].destroy()
+            self._views.pop("transcript").destroy()
 
         for view in self._views.values():
             view.grid_forget()
